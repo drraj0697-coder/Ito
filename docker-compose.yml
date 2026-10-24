@@ -1,0 +1,37 @@
+# Local full-stack smoke test. This runs Flask + MongoDB; GitHub Pages is not
+# required locally because Flask also serves the same PWA at /study/.
+services:
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "5001:5001"
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB: medq_online
+      FLASK_HOST: 0.0.0.0
+      FLASK_PORT: 5001
+      FLASK_DEBUG: "false"
+      FLASK_SECRET_KEY: local-development-only-change-me
+      # Same-origin local UI does not need CORS, but this allows a local static
+      # frontend at the commonly used port if you choose to run one.
+      CORS_ORIGINS: http://localhost:5173
+      # Makes the first docker-compose launch demonstrably usable.
+      SEED_DEMO: "true"
+
+volumes:
+  mongo_data:

@@ -1,0 +1,21 @@
+# Optional Render Blueprint for the always-on Flask API. Create the service
+# from this repository, then set the sync:false values in the Render dashboard.
+services:
+  - type: web
+    name: medq-online-api
+    env: docker
+    healthCheckPath: /api/pwa/health
+    autoDeploy: true
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB
+        value: medq_online
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SEED_DEMO
+        value: "false"
